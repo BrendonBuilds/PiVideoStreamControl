@@ -28,7 +28,6 @@ int Application::run(int& argc, char** argv)
 
     // connect frame grabber to handle video feed
     m_pMediaPlayer = new QMediaPlayer();
-    m_pMediaPlayer->setMedia(QMediaContent(QUrl("gst-pipeline: tcpclientsrc host=cm4 port=8888 ! decodebin ! videoconvert ! autovideosink")));
     m_pFrameGrabber = new VideoFrameGrabber();
     m_pMediaPlayer->setVideoOutput(m_pFrameGrabber);
     connect(m_pFrameGrabber, SIGNAL(frameAvailable(QVideoFrame)), this, SLOT(catchFrame(QVideoFrame)), Qt::DirectConnection);
@@ -37,9 +36,9 @@ int Application::run(int& argc, char** argv)
     return m_pApp->exec();
 }
 
-void Application::connectToStream()
+void Application::connectToStream(const QString& sIPAddr)
 {
-    m_pMediaPlayer->setMedia(QMediaContent(QUrl("gst-pipeline: tcpclientsrc host=cm4 port=8888 ! decodebin ! videoconvert ! autovideosink")));
+    m_pMediaPlayer->setMedia(QMediaContent(QUrl("gst-pipeline: tcpclientsrc host=" + sIPAddr + " port=8888 ! decodebin ! videoconvert ! autovideosink")));
     m_pMediaPlayer->play();
 }
 

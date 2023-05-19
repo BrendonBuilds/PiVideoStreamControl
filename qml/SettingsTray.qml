@@ -78,6 +78,48 @@ Item {
         Text {
             anchors.right: parent.right
             anchors.rightMargin: parent.width * 0.05
+            text: "Device Username"
+            color: colorConfig.textColorLight
+            font.italic: true
+        }
+
+        TextField {
+            id: usernameEntry
+            width: settingsColumn.itemWidth
+            height: settingsColumn.spacing * 5
+            anchors.horizontalCenter: parent.horizontalCenter
+            text: "pi"
+        }
+
+        Item {
+            width: parent.width
+            height: settingsColumn.iSpacing
+        }
+
+        Text {
+            anchors.right: parent.right
+            anchors.rightMargin: parent.width * 0.05
+            text: "Device IP address"
+            color: colorConfig.textColorLight
+            font.italic: true
+        }
+
+        TextField {
+            id: ipAddrEntry
+            width: settingsColumn.itemWidth
+            height: settingsColumn.spacing * 5
+            anchors.horizontalCenter: parent.horizontalCenter
+            text: "cm4"
+        }
+
+        Item {
+            width: parent.width
+            height: settingsColumn.iSpacing
+        }
+
+        Text {
+            anchors.right: parent.right
+            anchors.rightMargin: parent.width * 0.05
             text: "Shutter Timer (us)"
             color: colorConfig.textColorLight
             font.italic: true
@@ -161,8 +203,8 @@ Item {
 
 
             onClicked: {
-                app.runRemoteCommand("cm4", "pi", "libcamera-vid --camera 0 -v 0 -t 0 --width 1456 --height 1088 --awb indoor --inline --listen -o tcp://0.0.0.0:8888 --framerate 50 --shutter " + shutterTimeEntry.text + " --gain " + gainEntry.text)
-                app.connectToStream()
+                app.runRemoteCommand(ipAddrEntry.text, usernameEntry.text, "libcamera-vid --camera 0 -v 0 -t 0 --width 1456 --height 1088 --awb tungsten --inline --listen -o tcp://0.0.0.0:8888 --framerate 50 --shutter " + shutterTimeEntry.text + " --gain " + gainEntry.text)
+                app.connectToStream(ipAddrEntry.text)
             }
         }
 
@@ -178,7 +220,7 @@ Item {
 
             onClicked: {
                 app.stopStream()
-                app.runRemoteCommand("cm4", "pi", "killall libcamera-vid")
+                app.runRemoteCommand(ipAddrEntry.text, usernameEntry.text, "killall libcamera-vid")
             }
         }
 

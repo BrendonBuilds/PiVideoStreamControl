@@ -41,7 +41,7 @@ public:
 
 public slots:
     // connect probe to mediaplayer
-    void connectToStream();
+    void connectToStream(const QString &sIPAddr);
 
     void stopStream();
 
