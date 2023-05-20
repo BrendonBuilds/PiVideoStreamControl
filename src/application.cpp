@@ -86,9 +86,9 @@ void Application::catchFrame(const QVideoFrame &frame)
         cv::Mat videoImageBGR, videoImageGray, laplaceOutput;
 
 #ifdef Q_OS_WIN
-        cvtColor(videoImage.clone(), videoImageBGR, cv::COLOR_YUV2BGR_NV12);
+        cvtColor(videoImage.clone(), videoImageBGR, cv::COLOR_YUV2RGB_NV12);
 #else
-        cvtColor(videoImage.clone(), videoImageBGR, cv::COLOR_YUV2BGR_I420);
+        cvtColor(videoImage.clone(), videoImageBGR, cv::COLOR_YUV2RGB_I420);
 #endif
 
         cvtColor(videoImageBGR, videoImageGray, cv::COLOR_BGR2GRAY);

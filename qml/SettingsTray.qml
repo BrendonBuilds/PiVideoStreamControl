@@ -203,7 +203,7 @@ Item {
 
 
             onClicked: {
-                app.runRemoteCommand(ipAddrEntry.text, usernameEntry.text, "libcamera-vid --camera 0 -v 0 -t 0 --width 1456 --height 1088 --awb tungsten --inline --listen -o tcp://0.0.0.0:8888 --framerate 50 --shutter " + shutterTimeEntry.text + " --gain " + gainEntry.text)
+                app.runRemoteCommand(ipAddrEntry.text, usernameEntry.text, "libcamera-vid --camera 0 -v 0 -t 0 --width 1456 --height 1088 --awb indoor --inline --listen -o tcp://0.0.0.0:8888 --framerate 50 --shutter " + shutterTimeEntry.text + " --gain " + gainEntry.text)
                 app.connectToStream(ipAddrEntry.text)
             }
         }
