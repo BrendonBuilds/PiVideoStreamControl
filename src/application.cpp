@@ -2,6 +2,10 @@
 
 int Application::run(int& argc, char** argv)
 {
+    qputenv("QT_MULTIMEDIA_BACKEND", "gstreamer");
+    qputenv("QT_MULTIMEDIA_PREFERRED_PLUGINS", "gstreamer");
+    qputenv("GST_PLUGIN_PATH", "C:\\gstreamer_msvc\\1.0\\msvc_x86_64\\bin\\");
+
     // declare app, engine
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     m_pApp = new QGuiApplication(argc, argv);
@@ -38,7 +42,7 @@ int Application::run(int& argc, char** argv)
 
 void Application::connectToStream(const QString& sIPAddr)
 {
-    m_pMediaPlayer->setMedia(QMediaContent(QUrl("gst-pipeline: tcpclientsrc host=" + sIPAddr + " port=8888 ! decodebin ! videoconvert ! autovideosink")));
+    m_pMediaPlayer->setMedia(QMediaContent(QUrl("gst-pipeline: tcpclientsrc host=" + sIPAddr + " port=8888 ! decodebin ! videoconvert ! qtvideosink")));
     m_pMediaPlayer->play();
 }
 
