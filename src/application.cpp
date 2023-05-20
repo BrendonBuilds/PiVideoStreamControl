@@ -14,10 +14,10 @@ int Application::run(int& argc, char** argv)
     // link to main qml screen
     const QUrl url(QStringLiteral("qrc:/qml/main.qml"));
     QObject::connect(m_pEngine, &QQmlApplicationEngine::objectCreated,
-                     m_pApp, [url](QObject *obj, const QUrl &objUrl) {
-        if (!obj && url == objUrl)
-            QCoreApplication::exit(-1);
-    }, Qt::QueuedConnection);
+        m_pApp, [url](QObject *obj, const QUrl &objUrl) {
+            if (!obj && url == objUrl)
+                QCoreApplication::exit(-1);
+        }, Qt::QueuedConnection);
 
     // give ui access to the backend
     m_pEngine->rootContext()->setContextProperty("app", this);
@@ -85,7 +85,12 @@ void Application::catchFrame(const QVideoFrame &frame)
         // convert to BGR/gray
         cv::Mat videoImageBGR, videoImageGray, laplaceOutput;
 
+#ifdef Q_OS_WIN
+        cvtColor(videoImage.clone(), videoImageBGR, cv::COLOR_YUV2BGR_NV12);
+#else
         cvtColor(videoImage.clone(), videoImageBGR, cv::COLOR_YUV2BGR_I420);
+#endif
+
         cvtColor(videoImageBGR, videoImageGray, cv::COLOR_BGR2GRAY);
 
         // create a blue tinted grayscale image
