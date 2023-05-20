@@ -24,14 +24,23 @@ qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
-INCLUDEPATH += /usr/local/include/opencv4
+win32 {
+    INCLUDEPATH += C:/Code/TimeLapseTools/opencv_source/opencv/build/install/include
 
-LIBS += -L/usr/local/lib/
-LIBS += -lopencv_core
-LIBS += -lopencv_imgproc
-LIBS += -lopencv_highgui
-LIBS += -lopencv_imgcodecs
+    LIBS += -LC:/Code/TimeLapseTools/opencv_source/opencv/build/install/x64/vc17/lib
+    LIBS += -lopencv_core470
+    LIBS += -lopencv_imgproc470
+    LIBS += -lopencv_highgui470
+    LIBS += -lopencv_imgcodecs470
+} else {
+    INCLUDEPATH += /usr/local/include/opencv4
 
+    LIBS += -L/usr/local/lib/
+    LIBS += -lopencv_core
+    LIBS += -lopencv_imgproc
+    LIBS += -lopencv_highgui
+    LIBS += -lopencv_imgcodecs
+}
 
 RESOURCES += qml.qrc
 
