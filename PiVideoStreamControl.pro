@@ -46,6 +46,7 @@ RESOURCES += qml.qrc
 
 SOURCES += \
         src/application.cpp \
+        src/imageprovider.cpp \
         src/main.cpp
 
 HEADERS += \

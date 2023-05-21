@@ -10,7 +10,7 @@ Window {
     visible: true
 
     // account for windows scaling for high res screens
-    property double dWindowScaling: 1.5
+    property double dWindowScaling: 1.25
 
     width: 1456 / dWindowScaling
     height: 1088 / dWindowScaling
@@ -174,6 +174,14 @@ Window {
                 }
             }
         }
+    }
+
+    Text {
+        anchors.right: parent.right
+        anchors.top: parent.top
+        color: colorConfig.textColorLight
+
+        text: imageProvider.status
     }
 
     SettingsTray {

@@ -174,7 +174,7 @@ Item {
             width: settingsColumn.itemWidth
             height: settingsColumn.spacing * 5
             anchors.horizontalCenter: parent.horizontalCenter
-            text: "50"
+            text: "60"
         }
 
         Item {
@@ -233,7 +233,8 @@ Item {
                 id: overlayCheckbox
                 anchors.left: parent.left
                 height: parent.height
-                onClicked: {
+                onCheckedChanged: {
+                    imageProvider.setOutputOptions(overlayCheckbox.checked, histogramCheckbox.checked)
                 }
             }
 
@@ -261,11 +262,48 @@ Item {
             height: settingsColumn.iSpacing
         }
 
+        Item {
+            height: mainWindow.height * 0.035
+            width: settingsColumn.itemWidth
+            anchors.horizontalCenter: parent.horizontalCenter
+
+            CheckBox {
+                id: histogramCheckbox
+                anchors.left: parent.left
+                height: parent.height
+                onCheckedChanged: {
+                    imageProvider.setOutputOptions(overlayCheckbox.checked, histogramCheckbox.checked)
+                }
+            }
+
+            Text {
+                height: parent.height
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                verticalAlignment: Text.AlignVCenter
+                horizontalAlignment: Text.AlignRight
+
+                color: colorConfig.textColorLight
+                text: "Histogram"
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                onClicked: {
+                    histogramCheckbox.checked = !histogramCheckbox.checked
+                }
+            }
+        }
+
+        Item {
+            width: parent.width
+            height: settingsColumn.iSpacing
+        }
+
         Button {
             anchors.horizontalCenter: parent.horizontalCenter
 
             text: "Start Camera Stream"
-
 
             onClicked: {
                 app.runRemoteCommand(ipAddrEntry.text, usernameEntry.text, "libcamera-vid --camera 0 -v 0 -t 0 --width " + widthEntry.text + " --height " + heightEntry.text + " --awb indoor --inline --listen -o tcp://0.0.0.0:8888 --framerate " + framerateEntry.text + " --shutter " + shutterTimeEntry.text + " --gain " + gainEntry.text)
@@ -294,24 +332,32 @@ Item {
             height: settingsColumn.spacing
         }
 
-        Image {
-            id: currentImage
+        Rectangle {
             width: parent.width
-            fillMode: Image.PreserveAspectFit
+            height: histogramCheckbox.checked ? (settingsTrayTitle.height * 3) : 0
 
-            source: ""
+            visible: histogramCheckbox.checked
 
-            cache: false
+            color: "black"
 
-            Connections {
-                target: imageProvider
-                ignoreUnknownSignals: true
+            Image {
+                id: histogramImage
+                anchors.fill: parent
+                fillMode: Image.Stretch
 
-                onSignal_newData: {
-                    if(sTitle === "histo")
-                    {
-                        currentImage.source = ""
-                        currentImage.source = "image://imageProvider/" + sTitle;
+                source: ""
+                cache: false
+
+                Connections {
+                    target: imageProvider
+                    ignoreUnknownSignals: true
+
+                    onSignal_newData: {
+                        if(sTitle === "histo")
+                        {
+                            histogramImage.source = ""
+                            histogramImage.source = "image://imageProvider/" + sTitle;
+                        }
                     }
                 }
             }

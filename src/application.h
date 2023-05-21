@@ -55,9 +55,6 @@ private:
     QGuiApplication *m_pApp;
     QQmlApplicationEngine *m_pEngine;
 
-    QElapsedTimer timer;
-    int iFrameCount = 0;
-
     ImageProvider *m_pImageProvider;
     QMediaPlayer *m_pMediaPlayer;
     VideoFrameGrabber *m_pFrameGrabber;
