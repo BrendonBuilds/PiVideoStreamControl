@@ -4,7 +4,7 @@ int Application::run(int& argc, char** argv)
 {
     qputenv("QT_MULTIMEDIA_BACKEND", "gstreamer");
     qputenv("QT_MULTIMEDIA_PREFERRED_PLUGINS", "gstreamer");
-    qputenv("GST_PLUGIN_PATH", "C:\\gstreamer_msvc\\1.0\\msvc_x86_64\\bin\\");
+    //qputenv("GST_PLUGIN_PATH", "C:\\gstreamer_msvc\\1.0\\msvc_x86_64\\bin\\");
 
     // declare app, engine
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
@@ -86,40 +86,23 @@ void Application::catchFrame(const QVideoFrame &frame)
         cv::Mat videoImageBGR, videoImageGray, laplaceOutput;
 
 #ifdef Q_OS_WIN
-        cvtColor(videoImage.clone(), videoImageBGR, cv::COLOR_YUV2RGB_NV12);
+        cvtColor(videoImage, videoImageBGR, cv::COLOR_YUV2RGB_NV12);
 #else
         cvtColor(videoImage.clone(), videoImageBGR, cv::COLOR_YUV2RGB_I420);
 #endif
 
-        cvtColor(videoImageBGR, videoImageGray, cv::COLOR_BGR2GRAY);
+        // pass the original frame to the ui
+        m_pImageProvider->addImage(QImage((uchar*) videoImageBGR.data, videoImageBGR.cols, videoImageBGR.rows, videoImageBGR.step, QImage::Format_RGB888), "original");
 
-        // create a blue tinted grayscale image
-        cv::Mat grayScaleTinted(videoImageGray.rows, videoImageGray.cols, CV_8UC3, cv::Scalar(0, 0, 0));
-        cv::Mat splitGrayTinted[3];
-        cv::split(grayScaleTinted, splitGrayTinted);
-        for(int i = 0;i < videoImageGray.rows;++i)
-        {
-            for(int j = 0;j < videoImageGray.cols;++j)
-            {
-                // set the gray to the blue channel
-                splitGrayTinted[2].at<uint8_t>(i, j) = videoImageGray.at<uint8_t>(i, j);
-            }
-        }
-
-        cv::Mat imageTinted;
-        merge(splitGrayTinted, 3, imageTinted);
-
-        // usr original frame for now, hold onto blue tinted code
-        imageTinted = videoImageBGR;
-
-        m_pImageProvider->addImage(QImage((uchar*) imageTinted.data, imageTinted.cols, imageTinted.rows, imageTinted.step, QImage::Format_RGB888), "overlay");
 
         // find the focused areas
+        cvtColor(videoImageBGR, videoImageGray, cv::COLOR_BGR2GRAY);
         cv::Laplacian(videoImageGray, laplaceOutput, 64);
         cv::Mat focusColor(laplaceOutput.rows, laplaceOutput.cols, CV_8UC4, cv::Scalar(0, 0, 0, 0));
         cv::Mat splitBGRA[4];
         cv::split(focusColor, splitBGRA);
 
+        // create an overlay with alpha based on laplacian filter
         for(int i = 0;i < laplaceOutput.rows;++i)
         {
             for(int j = 0;j < laplaceOutput.cols;++j)
@@ -134,6 +117,7 @@ void Application::catchFrame(const QVideoFrame &frame)
         cv::Mat imageRescaledAll;
         merge(splitBGRA, 4, imageRescaledAll);
 
+        // pass focus overlay to ui
         m_pImageProvider->addImage(QImage((uchar*) imageRescaledAll.data, imageRescaledAll.cols, imageRescaledAll.rows, imageRescaledAll.step, QImage::Format_RGBA8888), "focusOverlay");
 
 
@@ -141,47 +125,50 @@ void Application::catchFrame(const QVideoFrame &frame)
         // HISTOGRAM
         // *********
 
-        // create the histogram
-        cv::Mat detectionROIHSV;
-        cvtColor(videoImageBGR, detectionROIHSV, cv::COLOR_BGR2HSV);
+        if(iFrameCount % 10 == 0)
+        {
+            // create the histogram
+            cv::Mat detectionROIHSV;
+            cvtColor(videoImageBGR, detectionROIHSV, cv::COLOR_BGR2HSV);
 
-        // hue is stored in 0-180
-        int hBins = 179;
-        int sBins = 1;
-        int histSize[] = {hBins, sBins};
-        float hRanges[] = {0.0f, (float)hBins};
-        float sRanges[] = {51.0f, 254.0f};
-        const float* ranges[] = {hRanges, sRanges};
-        int channels[] = {0, 1};
+            // hue is stored in 0-180
+            int hBins = 179;
+            int sBins = 1;
+            int histSize[] = {hBins, sBins};
+            float hRanges[] = {0.0f, (float)hBins};
+            float sRanges[] = {51.0f, 254.0f};
+            const float* ranges[] = {hRanges, sRanges};
+            int channels[] = {0, 1};
 
-        cv::MatND hist;
-        cv::calcHist(&detectionROIHSV, 1, channels, cv::Mat(), hist, 2, histSize, ranges, true, false);
+            cv::MatND hist;
+            cv::calcHist(&detectionROIHSV, 1, channels, cv::Mat(), hist, 2, histSize, ranges, true, false);
 
-        double maxVal = 0;
-        minMaxLoc(hist, 0, &maxVal, 0, 0);
+            double maxVal = 0;
+            minMaxLoc(hist, 0, &maxVal, 0, 0);
 
-        // prevent divide-by-zero
-        if(maxVal == 0) {
-            maxVal = 1;
-        }
-
-        cv::Mat histImg = cv::Mat::zeros(hBins, hBins * 4, CV_8UC3);
-
-        for( int h = 0; h < hBins; h++ ) {
-            for( int s = 0; s < sBins; s++ ) {
-                float binVal = hist.at<float>(h, s);
-
-                // draw a rectange for each bar
-                int iHeight = cvRound(binVal / maxVal * hBins);
-                if(iHeight == 0) {
-                    iHeight = 1;
-                }
-
-                rectangle(histImg, cv::Point(h * 4, hBins), cv::Point((h + 1) * 4, hBins - iHeight), cv::Scalar(h, 255, 255), cv::FILLED);
+            // prevent divide-by-zero
+            if(maxVal == 0) {
+                maxVal = 1;
             }
-        }
 
-        cvtColor(histImg, histImg, cv::COLOR_HSV2RGB);
-        m_pImageProvider->addImage(QImage((uchar*) histImg.data, histImg.cols, histImg.rows, histImg.step, QImage::Format_RGB888), "histo");
+            cv::Mat histImg = cv::Mat::zeros(hBins, hBins * 4, CV_8UC3);
+
+            for( int h = 0; h < hBins; h++ ) {
+                for( int s = 0; s < sBins; s++ ) {
+                    float binVal = hist.at<float>(h, s);
+
+                    // draw a rectange for each bar
+                    int iHeight = cvRound(binVal / maxVal * hBins);
+                    if(iHeight == 0) {
+                        iHeight = 1;
+                    }
+
+                    rectangle(histImg, cv::Point(h * 4, hBins), cv::Point((h + 1) * 4, hBins - iHeight), cv::Scalar(h, 255, 255), cv::FILLED);
+                }
+            }
+
+            cvtColor(histImg, histImg, cv::COLOR_HSV2RGB);
+            m_pImageProvider->addImage(QImage((uchar*) histImg.data, histImg.cols, histImg.rows, histImg.step, QImage::Format_RGB888), "histo");
+        }
     }
 }

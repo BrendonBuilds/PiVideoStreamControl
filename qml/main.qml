@@ -9,8 +9,11 @@ Window {
 
     visible: true
 
-    width: 1456
-    height: 1088
+    // account for windows scaling for high res screens
+    property double dWindowScaling: 1.5
+
+    width: 1456 / dWindowScaling
+    height: 1088 / dWindowScaling
 
     title: qsTr("Stream Viewer")
 
@@ -85,7 +88,7 @@ Window {
                         ignoreUnknownSignals: true
 
                         onSignal_newData: {
-                            if(sTitle === "overlay")
+                            if(sTitle === "original")
                             {
                                 currentFrame.source = ""
                                 currentFrame.source = "image://imageProvider/" + sTitle;
@@ -107,7 +110,7 @@ Window {
                 Rectangle {
                     anchors.fill: currentFrame
                     color: "black"
-                    opacity: 0.45
+                    opacity: 0.65
                     visible: settingsTray.overlayChecked
                 }
 

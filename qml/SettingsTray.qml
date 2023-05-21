@@ -5,7 +5,7 @@ import QtQuick.Controls 2.15
 Item {
     id: settingsTray
 
-    width: 300
+    width: 300 / mainWindow.dWindowScaling
     height: settingsColumn.childrenRect.height
 
     property bool bHidden: false
