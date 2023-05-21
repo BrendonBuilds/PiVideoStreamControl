@@ -11,6 +11,8 @@ Item {
     property bool bHidden: false
     property double leftMargin: bHidden ? (-1 * settingsTray.width) : 0
 
+    property bool bRunning: false
+
     anchors.leftMargin: settingsTray.leftMargin
 
     property alias overlayChecked: overlayCheckbox.checked
@@ -224,6 +226,29 @@ Item {
             height: settingsColumn.iSpacing
         }
 
+        Text {
+            anchors.right: parent.right
+            anchors.rightMargin: parent.width * 0.05
+            text: "White Balance"
+            color: colorConfig.textColorLight
+            font.italic: true
+        }
+
+        ComboBox {
+            id: awbEntry
+            width: settingsColumn.itemWidth
+            height: settingsColumn.spacing * 5
+            anchors.horizontalCenter: parent.horizontalCenter
+            model: ["auto", "incandescent", "tungsten", "fluorescent", "indoor", "daylight", "cloudy", "custom"]
+
+            currentIndex: 4
+        }
+
+        Item {
+            width: parent.width
+            height: settingsColumn.iSpacing
+        }
+
         Item {
             height: mainWindow.height * 0.035
             width: settingsColumn.itemWidth
@@ -302,11 +327,13 @@ Item {
 
         Button {
             anchors.horizontalCenter: parent.horizontalCenter
+            enabled: !settingsTray.bRunning
 
             text: "Start Camera Stream"
 
             onClicked: {
-                app.runRemoteCommand(ipAddrEntry.text, usernameEntry.text, "libcamera-vid --camera 0 -v 0 -t 0 --width " + widthEntry.text + " --height " + heightEntry.text + " --awb indoor --inline --listen -o tcp://0.0.0.0:8888 --framerate " + framerateEntry.text + " --shutter " + shutterTimeEntry.text + " --gain " + gainEntry.text)
+                settingsTray.bRunning = true
+                app.runRemoteCommand(ipAddrEntry.text, usernameEntry.text, "libcamera-vid --camera 0 -v 0 -t 0 --width " + widthEntry.text + " --height " + heightEntry.text + " --awb " + awbEntry.currentText + " --inline --listen -o tcp://0.0.0.0:8888 --framerate " + framerateEntry.text + " --shutter " + shutterTimeEntry.text + " --gain " + gainEntry.text)
                 app.connectToStream(ipAddrEntry.text)
             }
         }
@@ -318,10 +345,12 @@ Item {
 
         Button {
             anchors.horizontalCenter: parent.horizontalCenter
+            enabled: settingsTray.bRunning
 
             text: "Stop Camera Stream"
 
             onClicked: {
+                settingsTray.bRunning = false
                 app.stopStream()
                 app.runRemoteCommand(ipAddrEntry.text, usernameEntry.text, "killall libcamera-vid")
             }
