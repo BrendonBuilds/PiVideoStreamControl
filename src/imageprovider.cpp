@@ -26,14 +26,6 @@ void ImageProvider::addVideoFrame(const cv::Mat &videoFrame)
 {
     m_iFrameCount++;
 
-    // debug track fps
-    if(m_iFrameCount % 100 == 0)
-    {
-        qDebug() << "Total frames:" << m_iFrameCount << "," << 1000.0f / (float(m_framerateTimer.elapsed()) / 100.0f) << "fps";
-        setStatus(QString::number(1000.0f / (float(m_framerateTimer.elapsed()) / 100.0f)) + " fps");
-        m_framerateTimer.restart();
-    }
-
     // convert to the proper color-space
     cv::Mat videoImageBGR;
 #ifdef Q_OS_WIN

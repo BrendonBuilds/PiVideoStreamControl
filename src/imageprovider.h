@@ -4,6 +4,7 @@
 #include <QDebug>
 #include <QQuickImageProvider>
 #include <QVideoFrame>
+#include <QTimer>
 #include <QElapsedTimer>
 #include <QSize>
 #include <QMap>
@@ -18,8 +19,18 @@ class ImageProvider : public QObject, public QQuickImageProvider
     Q_PROPERTY(QString status READ getStatus WRITE setStatus NOTIFY signal_newStatus)
 
 public:
-    ImageProvider() : QQuickImageProvider(QQuickImageProvider::Image) {}
-    virtual ~ImageProvider() {}
+    ImageProvider() : QQuickImageProvider(QQuickImageProvider::Image) {
+        m_pFrameCounterTimer = new QTimer(this);
+
+        connect(m_pFrameCounterTimer, SIGNAL(timeout()), this, SLOT(updateFPS()));
+
+        m_pFrameCounterTimer->start(1000);
+        m_framerateTimer.restart();
+    }
+
+    virtual ~ImageProvider() {
+        delete m_pFrameCounterTimer;
+    }
 
     // return an image from the cache if it exists, otherwise a placeholder is returned
     QImage requestImage(const QString &id, QSize *size, const QSize &requestedSize);
@@ -48,6 +59,17 @@ public slots:
         emit signal_newStatus(m_sStatus);
     }
 
+private slots:
+    void updateFPS() {
+        float fFrameRate = 1000.0f / (float(m_framerateTimer.elapsed()) / float(m_iFrameCount));
+
+        qDebug() << "Total frames:" << m_iFrameCount << "," << fFrameRate << "fps";
+        setStatus(QString::number(fFrameRate) + " fps");
+
+        m_iFrameCount = 0;
+        m_framerateTimer.restart();
+    }
+
 signals:
     // notify the ui that new data has been cached, let it determine what to redraw
     void signal_newData(const QString& sTitle);
@@ -61,6 +83,7 @@ private:
     bool m_bDrawFocusOverlay = false;
     bool m_bDrawHistogram = false;
 
+    QTimer *m_pFrameCounterTimer;
     QString m_sStatus;
     QElapsedTimer m_framerateTimer;
     int m_iFrameCount = 0;
