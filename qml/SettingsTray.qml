@@ -49,8 +49,8 @@ Item {
         anchors.fill: parent
 
         // scales everything to system font size
-        spacing: mainWindow.height * 0.006
-        property int iSpacing: 10
+        spacing: 5
+        property int iSpacing: 2
         property int itemWidth: settingsTray.width * 0.9
 
         Text {
@@ -110,6 +110,71 @@ Item {
             height: settingsColumn.spacing * 5
             anchors.horizontalCenter: parent.horizontalCenter
             text: "cm4"
+        }
+
+        Item {
+            width: parent.width
+            height: settingsColumn.iSpacing
+        }
+
+        Text {
+            anchors.right: parent.right
+            anchors.rightMargin: parent.width * 0.05
+            text: "Resolution"
+            color: colorConfig.textColorLight
+            font.italic: true
+        }
+
+        Item {
+            width: settingsColumn.itemWidth
+            height: widthEntry.height
+
+            anchors.horizontalCenter: parent.horizontalCenter
+
+            TextField {
+                id: widthEntry
+                width: settingsColumn.itemWidth * 0.45
+                height: settingsColumn.spacing * 5
+                anchors.left: parent.left
+                anchors.verticalCenter: parent.verticalCenter
+                text: "1456"
+            }
+
+            Text {
+                anchors.centerIn: parent
+                text: "x"
+                color: colorConfig.textColorLight
+            }
+
+            TextField {
+                id: heightEntry
+                width: settingsColumn.itemWidth * 0.45
+                height: settingsColumn.spacing * 5
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                text: "1088"
+            }
+        }
+
+        Item {
+            width: parent.width
+            height: settingsColumn.iSpacing
+        }
+
+        Text {
+            anchors.right: parent.right
+            anchors.rightMargin: parent.width * 0.05
+            text: "Framerate"
+            color: colorConfig.textColorLight
+            font.italic: true
+        }
+
+        TextField {
+            id: framerateEntry
+            width: settingsColumn.itemWidth
+            height: settingsColumn.spacing * 5
+            anchors.horizontalCenter: parent.horizontalCenter
+            text: "50"
         }
 
         Item {
@@ -203,7 +268,7 @@ Item {
 
 
             onClicked: {
-                app.runRemoteCommand(ipAddrEntry.text, usernameEntry.text, "libcamera-vid --camera 0 -v 0 -t 0 --width 1456 --height 1088 --awb indoor --inline --listen -o tcp://0.0.0.0:8888 --framerate 50 --shutter " + shutterTimeEntry.text + " --gain " + gainEntry.text)
+                app.runRemoteCommand(ipAddrEntry.text, usernameEntry.text, "libcamera-vid --camera 0 -v 0 -t 0 --width " + widthEntry.text + " --height " + heightEntry.text + " --awb indoor --inline --listen -o tcp://0.0.0.0:8888 --framerate " + framerateEntry.text + " --shutter " + shutterTimeEntry.text + " --gain " + gainEntry.text)
                 app.connectToStream(ipAddrEntry.text)
             }
         }
