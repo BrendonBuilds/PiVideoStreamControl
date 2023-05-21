@@ -1,15 +1,15 @@
 # PiVideoStreamControl
-Remotely control libcamera-vid from Ubuntu + gstreamer
+Remotely control libcamera-vid from Windows/Ubuntu + gstreamer
 
 
 Requirements:
-- Qt 5.15 installed on Ubuntu
+- Qt 5.15 installed on Windows/Ubuntu
 
 - SSH is installed, added to PATH/available from CLI
 
 - Pre-shared keys to prevent password prompts when using SSH with Raspberry Pi: https://danidudas.medium.com/how-to-connect-to-raspberry-pi-via-ssh-without-password-using-ssh-keys-3abd782688a
 
-- Rebuild QtMultimedia with GStreamer Support: https://github.com/gunrot/windows-qt-with-gstreamer
+- Rebuild QtMultimedia with GStreamer Support (Windows only): https://github.com/gunrot/windows-qt-with-gstreamer
 
 
 For this software to run:
